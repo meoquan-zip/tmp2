@@ -1,4 +1,9 @@
+import os
+
 import streamlit as st
+
+if not os.path.exists("./data/"):
+    os.makedirs("./data/")
 
 st.set_page_config(
     page_title="Home - VSAT App",
