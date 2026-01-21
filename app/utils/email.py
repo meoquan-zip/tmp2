@@ -31,7 +31,7 @@ def render_incident_email(incident):
 
 def send_email(to_email, subject, body):
 	smtp_server = os.getenv("SMTP_SERVER", "localhost")
-	smtp_port = int(os.getenv("SMTP_PORT", 25))
+	smtp_port = int(os.getenv("SMTP_PORT", 1025))
 	smtp_user = os.getenv("SMTP_USER", "")
 	smtp_password = os.getenv("SMTP_PASSWORD", "")
 	from_email = os.getenv("FROM_EMAIL", "noreply@example.com")
