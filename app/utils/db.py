@@ -114,6 +114,12 @@ def get_overdue_incidents(sla_time: timedelta = timedelta(minutes=1),
         Incident.notified == False,
         Incident.created_at <= t
     ).all()
+    if incidents:
+        for incident in incidents:
+            print(f"created_at: {incident.created_at}")
+        print(f"now: {now}")
+        print(f"t: {t}")
+        print()
     return incidents
 
 
