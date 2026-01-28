@@ -27,6 +27,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.docstore.document import Document
 
+from utils.db_orm import Incident
+
 # --- Constants ---
 DEFAULT_DOCS_DIR    = "docs"
 DEFAULT_PERSIST_DIR = "Vector_DB - Documents"
@@ -289,7 +291,7 @@ def has_new_files_user(username: str, current_files: List[str]) -> bool:
 
 def get_vectorstore_user(
         username: str,
-        file_list: List[str]
+        file_list: List[str] = []
 ) -> 'Chroma':
     """
     Get user-specific vectorstore
@@ -340,6 +342,9 @@ def get_vectorstore_user(
 
     # Add only unique chunks
     if unique_chunks:
+        # this returns a list of IDs of added documents
+        # todo: retrieve and store these IDs so when user deletes a document file,
+        #       we can also delete corresponding vectors from the vectordb
         vectordb.add_documents(unique_chunks)
         vectordb.persist()
 
@@ -383,3 +388,29 @@ def cleanup_user_data(username: str):
 #
 #     return None
 
+def add_resolved_incident_to_vectordb(
+    username: str,
+    incident: Incident,
+) -> List[str]:
+    """Add resolved incident details to user's vectorstore"""
+    _ = ensure_user_dirs(username)
+
+    # Tạo document từ thông tin incident
+    # content = f"""
+    #     Incident Name: {incident.name}\n\nDescription: {incident.description}\n\nSolution: {incident.solution}"
+    content = "\n\n".join([
+        f"Incident Name: {incident.name}",
+        f"Description: {incident.description}",
+        f"Solution: {incident.solution}",
+    ])
+    doc = Document(page_content=content, metadata={"source": f"incident_{incident.id}"})
+
+    # Lấy vectorstore của user
+    vectordb = get_vectorstore_user(username)
+
+    # Thêm document vào vectordb
+    ids = vectordb.add_documents([doc])
+    vectordb.persist()
+
+    st.success(f"✅ Added resolved incident '{incident.name}' to vectorstore for user: {username}")
+    return ids

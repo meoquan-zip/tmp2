@@ -8,6 +8,7 @@ from utils.db_crud import (
     delete_incident,
 )
 # from utils.email import start_periodic_notifier
+from utils.prepare_vectordb import add_resolved_incident_to_vectordb
 
 st.set_page_config(
     page_title="Incident Report - VSAT App",
@@ -98,7 +99,12 @@ else:
                             if not solution.strip():
                                 st.warning("Solution cannot be empty.")
                             else:
-                                resolve_incident(incident.id, solution)
+                                incident = resolve_incident(incident.id, solution)
+                                add_resolved_incident_to_vectordb(
+                                    # todo: get actual username
+                                    username="admin",
+                                    incident=incident
+                                )
                                 st.success("Incident resolved.")
                                 st.session_state[f"show_solution_{incident.id}"] = False
                                 st.rerun()
@@ -148,7 +154,12 @@ if st.session_state["selected_incident_id"]:
                     if not sidebar_solution.strip():
                         st.sidebar.warning("Solution cannot be empty.")
                     else:
-                        resolve_incident(incident.id, sidebar_solution)
+                        incident = resolve_incident(incident.id, sidebar_solution)
+                        add_resolved_incident_to_vectordb(
+                            # todo: get actual username
+                            username="admin",
+                            incident=incident,
+                        )
                         st.sidebar.success("Incident resolved.")
                         st.session_state[f"sidebar_show_solution_{incident.id}"] = False
                         st.rerun()
