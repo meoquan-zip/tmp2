@@ -10,6 +10,7 @@ from sqlalchemy import (
     Boolean,
     create_engine,
     DateTime,
+    Float,
     func,
     String
 )
@@ -34,10 +35,11 @@ class Incident(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
+    sla_no_of_hours: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
     log: Mapped[Optional[str]] = mapped_column(String)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="open")  # "open" or "resolved"
-    notified: Mapped[bool] = mapped_column(nullable=False, default=False)
+    notified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     solution: Mapped[Optional[str]] = mapped_column(String)
     created_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=False, server_default=func.now())
     # created_by: Mapped[Optional[str]] = mapped_column(String(255))

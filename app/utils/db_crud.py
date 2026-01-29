@@ -27,12 +27,14 @@ def create_incident(name: str,
                     description: str,
                     email: str,
                     log: Optional[str] = None,
+                    sla_no_of_hours: float = 1.0,
                     session: Session = get_session()) -> Incident:
     incident = Incident(
         name=name,
         description=description,
         email=email,
         log=log,
+        sla_no_of_hours=sla_no_of_hours,
     )
     session.add(incident)
     session.commit()

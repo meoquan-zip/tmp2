@@ -34,6 +34,7 @@ if st.session_state["show_dialog"]:
         st.subheader("Report New Incident")
         name = st.text_input("Name")
         description = st.text_area("Description", max_chars=1000)
+        sla_no_of_hours = st.number_input("SLA (hours)", min_value=0.0, value=1.0, step=0.5, format="%.2f")
         email = st.text_input("Email")
         log = st.text_area("Log (optional)", max_chars=5000)
         submitted = st.form_submit_button("Submit")
@@ -49,7 +50,13 @@ if st.session_state["show_dialog"]:
             if missing_fields:
                 st.warning(f"Required field(s) missing: {', '.join(missing_fields)}.")
             else:
-                create_incident(name, description, email, log if log else None)
+                create_incident(
+                    name,
+                    description,
+                    email,
+                    log if log else None,
+                    sla_no_of_hours
+                )
                 st.success("Incident reported!")
                 st.session_state["show_dialog"] = False
                 st.rerun()
