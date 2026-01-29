@@ -54,10 +54,35 @@ class ChatMessage(Base):
     timestamp: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=False, server_default=func.now())
 
 
+def _ensure_sqlite_dir(db_url: str) -> str:
+    """For sqlite URLs, ensure the parent directory exists before connecting."""
+    if not db_url.startswith("sqlite"):
+        return db_url
+    # Skip in-memory DBs
+    if db_url.endswith(":memory:"):
+        return db_url
+
+    # sqlite:///relative/path.db or sqlite:////absolute/path.db
+    prefix = "sqlite:///"
+    path = db_url[len(prefix):] if db_url.startswith(prefix) else db_url
+    # On Windows an absolute path may start with /C:/... after sqlite:////
+    if path.startswith("/") and ":" in path[:4]:
+        path = path[1:]
+
+    directory = os.path.dirname(path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    return db_url
+
+
 @lru_cache()
 def get_engine(connection_url: str = None) -> Engine:
     if connection_url is None:
-        connection_url = os.getenv("DATABASE_URL", "sqlite:///./incidents.db")
+        default_path = os.path.join(os.getcwd(), "data", "incidents.db")
+        os.makedirs(os.path.dirname(default_path), exist_ok=True)
+        connection_url = os.getenv("DATABASE_URL", f"sqlite:///{default_path}")
+
+    connection_url = _ensure_sqlite_dir(connection_url)
     return create_engine(connection_url)
 
 
