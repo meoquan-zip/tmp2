@@ -5,7 +5,6 @@ import streamlit as st
 
 from .auth import UserAuth
 from .chatbot import chat, load_chat_history_from_db
-from .db_orm import create_all_tables
 from .prepare_vectordb import (
     cleanup_user_data,
     get_user_dirs,
@@ -25,9 +24,6 @@ class ChatApp:
     def __init__(self):
         st.set_page_config(page_title="VSAT Chatbot")
         # st.title("VSAT Chatbot")
-
-        # Initialize database tables
-        create_all_tables()
 
         # Initialize authentication
         self.auth = UserAuth()
