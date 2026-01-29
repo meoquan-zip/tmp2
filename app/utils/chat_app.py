@@ -3,18 +3,18 @@ import os
 
 import streamlit as st
 
-from utils.auth import UserAuth
-from utils.chatbot import chat, load_chat_history_from_db
-from utils.db_orm import create_all_tables
-from utils.prepare_vectordb import (
+from .auth import UserAuth
+from .chatbot import chat, load_chat_history_from_db
+from .db_orm import create_all_tables
+from .prepare_vectordb import (
+    cleanup_user_data,
+    get_user_dirs,
     get_vectorstore_user,
     has_new_files_user,
-    cleanup_user_data,
-    get_user_dirs
 )
-from utils.save_docs import save_docs_to_vectordb_user, get_user_documents
-# from utils.save_urls import save_url_to_vectordb_user
-# from utils.session_state import initialize_session_state_variables
+from .save_docs import get_user_documents, save_docs_to_vectordb_user
+# from .save_urls import save_url_to_vectordb_user
+# from .session_state import initialize_session_state_variables
 
 
 class ChatApp:
@@ -142,7 +142,8 @@ class ChatApp:
                     with col2:
                         if f"confirm_delete_{username}" in st.session_state and st.session_state[f"confirm_delete_{username}"] == doc_to_delete:
                             if st.button("⚠️ Confirm", use_container_width=True, key=f"confirm_btn_{username}"):
-                                from utils.save_docs import delete_user_document
+                                from utils.save_docs import \
+                                    delete_user_document
                                 if delete_user_document(username, doc_to_delete):
                                     # Xóa vectorstore để force rebuild
                                     user_vectordb_key = f'vectordb_{username}'

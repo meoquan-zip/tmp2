@@ -1,13 +1,13 @@
 import streamlit as st
 
-from utils.db_orm import create_all_tables
 from utils.db_crud import (
-    list_incidents,
     create_incident,
-    get_incident_by_id,
-    resolve_incident,
     delete_incident,
+    get_incident_by_id,
+    list_incidents,
+    resolve_incident,
 )
+from utils.db_orm import create_all_tables
 from utils.email import init_incident_notifier
 from utils.save_docs import (
     add_resolved_incident_to_vectordb,

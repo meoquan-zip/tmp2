@@ -1,12 +1,11 @@
 import os
 
-from langchain.docstore.document import Document
 import streamlit as st
+from langchain.docstore.document import Document
 
 from .db_orm import Incident
 from .prepare_vectordb import (
-    ensure_user_dirs,
-    get_user_dirs,
+    ensure_user_dirs, get_user_dirs,
     get_vectorstore_user,
 )
 

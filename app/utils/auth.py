@@ -1,9 +1,11 @@
+import os
+
+import bcrypt
 import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
-import os
 from yaml.loader import SafeLoader
-import bcrypt
+
 
 class UserAuth:
     def __init__(self, config_path="config/users.yaml"):

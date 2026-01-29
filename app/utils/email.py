@@ -1,9 +1,9 @@
-from datetime import timedelta
-from email.mime.text import MIMEText
 import os
 import smtplib
 import threading
 import time
+from datetime import timedelta
+from email.mime.text import MIMEText
 
 from dotenv import load_dotenv
 from jinja2 import Template

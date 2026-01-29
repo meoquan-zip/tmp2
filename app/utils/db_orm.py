@@ -1,26 +1,13 @@
+import os
+import uuid
 from datetime import datetime, timedelta
 from functools import lru_cache
-import os
-from typing import List
-from typing import Optional
-import uuid
+from typing import List, Optional
 
 from dotenv import load_dotenv
-from sqlalchemy import (
-    Boolean,
-    create_engine,
-    DateTime,
-    Float,
-    func,
-    String
-)
+from sqlalchemy import Boolean, DateTime, Float, String, create_engine, func
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import (
-    DeclarativeBase,
-    Mapped,
-    mapped_column,
-    Session,
-)
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
 load_dotenv()
 

@@ -1,14 +1,8 @@
-from typing import List
-from typing import Optional
+from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
-from utils.db_orm import (
-    get_session,
-    Incident,
-    ChatMessage,
-)
-
+from .db_orm import ChatMessage, Incident, get_session
 
 # =========================Incident=========================
 

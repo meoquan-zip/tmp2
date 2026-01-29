@@ -1,35 +1,33 @@
-# utils/prepare_vectordb.py
-
-import nest_asyncio
-nest_asyncio.apply()
-
+import hashlib
 import os
+import re
 import shutil
 import uuid
 from collections import defaultdict
 from typing import List, Tuple
-import streamlit as st
-import hashlib
-import pandas as pd
-import re
-import fitz  # PyMuPDF for PDF image extraction
-from paddleocr import PaddleOCR
 
-from dotenv import load_dotenv
 import chromadb
+import fitz  # PyMuPDF for PDF image extraction
+import nest_asyncio
+import pandas as pd
+import streamlit as st
+from dotenv import load_dotenv
+from langchain.docstore.document import Document
+# from langchain.embeddings import OpenAIEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import (
+    Docx2txtLoader,
     PyPDFLoader,
     TextLoader,
-    Docx2txtLoader,
-    UnstructuredWordDocumentLoader
+    UnstructuredWordDocumentLoader,
 )
 from langchain_community.vectorstores import Chroma
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-# from langchain.embeddings import OpenAIEmbeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain.docstore.document import Document
+from paddleocr import PaddleOCR
 
-from utils.db_orm import Incident
+from .db_orm import Incident
+
+nest_asyncio.apply()
 
 # --- Constants ---
 DEFAULT_DOCS_DIR    = "docs"
@@ -85,8 +83,8 @@ def ocr_pdf_with_paddleocr(pdf_path, lang='vi'):  # Vietnamese support
             xref = img[0]
             base_image = doc.extract_image(xref)
             image_bytes = base_image["image"]
-            import numpy as np
             import cv2
+            import numpy as np
             img_array = np.frombuffer(image_bytes, np.uint8)
             img_cv = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
             if img_cv is not None:
@@ -311,12 +309,10 @@ def has_new_files_user(username: str, current_files: List[str]) -> bool:
 def get_vectorstore_user(
         username: str,
         file_list: List[str] = []
-) -> 'Chroma':
+) -> Chroma:
     """
     Get user-specific vectorstore
     """
-    from langchain_google_genai import GoogleGenerativeAIEmbeddings
-    from langchain_community.vectorstores import Chroma
 
     # Ensure user directories exist
     dirs = ensure_user_dirs(username)
@@ -352,7 +348,7 @@ def get_vectorstore_user(
 
     # Deduplicate by chunk content hash
     seen_hashes = set()
-    unique_chunks = []
+    unique_chunks: List[Document] = []
     ids_by_file: defaultdict[str, List[str]] = defaultdict(list)
     for chunk in chunks:
         content_hash = hash_text(chunk.page_content)

@@ -1,5 +1,3 @@
-# utils/session_state.py
-
 def initialize_session_state_variables(st):
     if "uploaded_pdfs" not in st.session_state:
         st.session_state.uploaded_pdfs = []

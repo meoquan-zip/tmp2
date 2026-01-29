@@ -1,14 +1,14 @@
-# utils/save_urls.py
-
 import os
 import re
+from typing import List, Optional, Set, Tuple
+from urllib.parse import urljoin, urlparse
+
 import requests
 import streamlit as st
-from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from bs4.element import Tag
-from typing import List, Tuple, Optional, Set
-from .prepare_vectordb import get_user_dirs, ensure_user_dirs
+
+from .prepare_vectordb import ensure_user_dirs, get_user_dirs
 
 # Add a global variable to track first scan
 first_scan_done = False
