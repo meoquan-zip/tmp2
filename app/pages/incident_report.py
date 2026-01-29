@@ -8,7 +8,7 @@ from utils.db_crud import (
     delete_incident,
 )
 # from utils.email import start_periodic_notifier
-from utils.prepare_vectordb import (
+from utils.save_docs import (
     add_resolved_incident_to_vectordb,
     delete_incident_from_vectordb,
 )

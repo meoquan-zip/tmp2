@@ -1,6 +1,14 @@
-import streamlit as st
 import os
-from .prepare_vectordb import get_user_dirs, ensure_user_dirs
+
+from langchain.docstore.document import Document
+import streamlit as st
+
+from .db_orm import Incident
+from .prepare_vectordb import (
+    ensure_user_dirs,
+    get_user_dirs,
+    get_vectorstore_user,
+)
 
 
 def save_docs_to_vectordb_user(username: str, uploaded_docs, existing_docs):
@@ -110,3 +118,46 @@ def save_docs_to_vectordb(uploaded_docs, existing_docs):
         return new_file_names
 
     return []
+
+# =============================================================================
+
+def add_resolved_incident_to_vectordb(
+    username: str,
+    incident: Incident,
+) -> str:
+    """Add resolved incident details to user's vectorstore"""
+    _ = ensure_user_dirs(username)
+
+    # Tạo document từ thông tin incident
+    # content = f"""
+    #     Incident Name: {incident.name}\n\nDescription: {incident.description}\n\nSolution: {incident.solution}"
+    content = "\n\n".join([
+        f"Incident Name: {incident.name}",
+        f"Description: {incident.description}",
+        f"Solution: {incident.solution}",
+    ])
+    incident_id = f"incident_{incident.id}"
+    doc = Document(page_content=content, metadata={"source": incident_id})
+
+    # Lấy vectorstore của user
+    vectordb = get_vectorstore_user(username)
+
+    # Thêm document vào vectordb
+    vectordb.add_documents([doc], ids=[incident_id])
+    vectordb.persist()
+
+    st.success(f"✅ Added resolved incident '{incident.name}' to vectorstore for user: {username}")
+    return incident_id
+
+def delete_incident_from_vectordb(
+    username: str,
+    incident_id: str,
+) -> None:
+    """Delete incident document from user's vectorstore"""
+    vectordb = get_vectorstore_user(username)
+
+    if not incident_id.startswith("incident_"):
+        incident_id = f"incident_{incident_id}"
+
+    vectordb.delete(ids=[incident_id])
+    vectordb.persist()
