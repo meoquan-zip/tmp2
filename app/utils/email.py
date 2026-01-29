@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from jinja2 import Template
 
 from .db_crud import (
+    get_incident_by_id,
     is_incident_overdue,
     mark_incident_notified,
 )
@@ -24,14 +25,25 @@ def render_incident_email(incident: Incident) -> str:
     Name: {{ incident.name }}\n
     Description: {{ incident.description }}\n
     Log: {{ incident.log or 'N/A' }}\n
-    Created At: {{ incident.created_at }}\n
+    Created at: {{ incident.created_at }}\n
     """
     template = Template(template_str)
     return template.render(incident=incident)
 
 
-def send_incident_email_delay(incident: Incident,
+def send_incident_email_delay(incident_id: str,
                               subject: str = "Overdue Incident Notification"):
+    incident = get_incident_by_id(incident_id)
+    if incident is None:
+        return
+
+    delay_time = incident.sla_no_of_hours * 60  # leave as minutes for testing purposes
+    time.sleep(delay_time)
+
+    incident = get_incident_by_id(incident_id)
+    if incident is None or not is_incident_overdue(incident.id):
+        return
+
     smtp_server = os.getenv("SMTP_SERVER", "localhost")
     smtp_port = int(os.getenv("SMTP_PORT", 1025))
     smtp_user = os.getenv("SMTP_USER", "")
@@ -44,27 +56,22 @@ def send_incident_email_delay(incident: Incident,
     msg["From"] = from_email
     msg["To"] = incident.email
 
-    delay_time = incident.sla_no_of_hours * 60  # leave as minutes for testing purposes
-    time.sleep(delay_time)
-
     with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
         if smtp_user and smtp_password:
             server.login(smtp_user, smtp_password)
         server.sendmail(from_email, [incident.email], msg.as_string())
-
-
-def init_incident_notifier(incident: Incident):
-    if not is_incident_overdue(incident.id):
-        return
     
+    mark_incident_notified(incident_id)
+
+
+def init_incident_notifier(incident_id: str):    
     thread = threading.Thread(
         target=send_incident_email_delay,
-        args=(incident,),
+        args=(incident_id,),
         daemon=True
     )
     thread.start()
     thread.join()
-    mark_incident_notified(incident.id)
 
 
 # def notify_overdue_incidents(sla_time: timedelta = timedelta(minutes=1)):

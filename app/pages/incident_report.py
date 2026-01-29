@@ -58,7 +58,7 @@ if st.session_state["show_dialog"]:
                     log if log else None,
                     sla_no_of_hours
                 )
-                init_incident_notifier(incident)
+                init_incident_notifier(incident.id)
                 st.success("Incident reported!")
                 st.session_state["show_dialog"] = False
                 st.rerun()
