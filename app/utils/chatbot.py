@@ -16,49 +16,49 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from utils.db_crud import log_chat_message, get_user_last_n_messages
 
 
-def get_context_retriever_chain(vectordb, callbacks=None):
-    """
-    Create a context retriever chain for generating responses using ChatGPT-4o-mini.
-    """
-    load_dotenv()
+# def get_context_retriever_chain(vectordb, callbacks=None):
+#     """
+#     Create a context retriever chain for generating responses using ChatGPT-4o-mini.
+#     """
+#     load_dotenv()
 
-    # Use OpenAI's GPT-4o-mini via LangChain wrapper
-    # llm = ChatOpenAI(
-    #     model="gpt-4o-mini",
-    #     temperature=0.1,
-    #     streaming=callbacks is not None,
-    #     callbacks=callbacks,
-    #     openai_api_key=st.secrets["OPENAI_API_KEY"]
-    # )
+#     # Use OpenAI's GPT-4o-mini via LangChain wrapper
+#     # llm = ChatOpenAI(
+#     #     model="gpt-4o-mini",
+#     #     temperature=0.1,
+#     #     streaming=callbacks is not None,
+#     #     callbacks=callbacks,
+#     #     openai_api_key=st.secrets["OPENAI_API_KEY"]
+#     # )
 
-    llm = ChatGoogleGenerativeAI(
-        model=os.getenv("GENERATIVE_AI_MODEL"),
-        temperature=0.1,
-        streaming=True,
-        google_api_key=os.getenv('GOOGLE_API_KEY')
-    )
+#     llm = ChatGoogleGenerativeAI(
+#         model=os.getenv("GENERATIVE_AI_MODEL"),
+#         temperature=0.1,
+#         streaming=True,
+#         google_api_key=os.getenv('GOOGLE_API_KEY')
+#     )
 
-    retriever = vectordb.as_retriever()
+#     retriever = vectordb.as_retriever()
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are a chatbot. You'll receive a prompt that includes a chat history and retrieved content from the vectorDB based on the user's question. Your task is to respond to the user's question using the information from the vectordb, relying as little as possible on your own knowledge. If for some reason you don't know the answer for the question, or the question cannot be answered because there's no context, ask the user for more details. Do not invent an answer, or mention about the knowledge base. Answer the questions from this context: {context}"),
-        MessagesPlaceholder(variable_name="chat_history"),
-        ("human", "{input}")
-    ])
+#     prompt = ChatPromptTemplate.from_messages([
+#         ("system", "You are a chatbot. You'll receive a prompt that includes a chat history and retrieved content from the vectorDB based on the user's question. Your task is to respond to the user's question using the information from the vectordb, relying as little as possible on your own knowledge. If for some reason you don't know the answer for the question, or the question cannot be answered because there's no context, ask the user for more details. Do not invent an answer, or mention about the knowledge base. Answer the questions from this context: {context}"),
+#         MessagesPlaceholder(variable_name="chat_history"),
+#         ("human", "{input}")
+#     ])
 
-    chain = create_stuff_documents_chain(llm=llm, prompt=prompt)
-    retrieval_chain = create_retrieval_chain(retriever, chain)
-    return retrieval_chain
+#     chain = create_stuff_documents_chain(llm=llm, prompt=prompt)
+#     retrieval_chain = create_retrieval_chain(retriever, chain)
+#     return retrieval_chain
 
-def get_response(question, chat_history, vectordb):
-    """
-    Generate a response using GPT-4o-mini based on the user question and retrieved context.
-    """
-    chain = get_context_retriever_chain(vectordb)
-    response = chain.invoke({"input": question, "chat_history": chat_history})
+# def get_response(question, chat_history, vectordb):
+#     """
+#     Generate a response using GPT-4o-mini based on the user question and retrieved context.
+#     """
+#     chain = get_context_retriever_chain(vectordb)
+#     response = chain.invoke({"input": question, "chat_history": chat_history})
     
-    # Fix key access for documents
-    return response.get("answer") or response.get("result"), response.get("context") or response.get("source_documents")
+#     # Fix key access for documents
+#     return response.get("answer") or response.get("result"), response.get("context") or response.get("source_documents")
 
 def load_chat_history_from_db(username: str) -> List:
     """
