@@ -31,7 +31,8 @@ if st.session_state["show_dialog"]:
         st.subheader("Report New Incident")
         name = st.text_input("Name")
         description = st.text_area("Description", max_chars=1000)
-        sla_no_of_hours = st.number_input("SLA (minutes)", min_value=0.0, value=1.0, step=0.25, format="%.2f")
+        # leave SLA in minutes for testing purposes
+        sla_no_of_hours = st.number_input("SLA time (minutes)", min_value=0.0, value=1.0, step=0.25, format="%.2f")
         email = st.text_input("Email")
         log = st.text_area("Log (optional)", max_chars=5000)
         submitted = st.form_submit_button("Submit")
@@ -89,6 +90,7 @@ else:
                 st.write(incident.solution)
             # st.write(f"**Recipient email:** {incident.email}")
             # st.write(f"**Status:** {incident.status}")
+            st.write(f"**SLA time (minutes):** {incident.sla_no_of_hours:.2f}")  # minutes for testing purposes
             st.write(f"**Notified:** {'Yes' if incident.notified else 'No'}")
             st.write(f"**Created at:** {incident.created_at}")
             st.write(f"**Updated at:** {incident.updated_at}")
@@ -153,8 +155,9 @@ if st.session_state["selected_incident_id"]:
         if incident.solution:
             st.sidebar.markdown("**Solution:**")
             st.sidebar.write(incident.solution)
-        st.sidebar.write(f"**Recipient email:** {incident.email}")
         st.sidebar.write(f"**Status:** {incident.status}")
+        st.sidebar.write(f"**SLA time (minutes):** {incident.sla_no_of_hours:.2f}")  # minutes for testing purposes
+        st.sidebar.write(f"**Recipient email:** {incident.email}")
         st.sidebar.write(f"**Notified:** {'Yes' if incident.notified else 'No'}")
         st.sidebar.write(f"**Created at:** {incident.created_at}")
         st.sidebar.write(f"**Updated at:** {incident.updated_at}")
