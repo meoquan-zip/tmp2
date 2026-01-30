@@ -155,7 +155,13 @@ def add_resolved_incident_to_vectordb(
         f"Solution: {incident.solution}",
     ])
     incident_id = f"incident_{incident.id}"
-    doc = Document(page_content=content, metadata={"source": incident_id})
+    doc = Document(
+        page_content=content,
+        metadata={
+            "source": incident_id,
+            "filename": incident_id
+        }
+    )
 
     # Lấy vectorstore của user
     vectordb = get_vectorstore_user(username)

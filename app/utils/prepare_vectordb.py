@@ -106,7 +106,13 @@ def ocr_pdf_with_paddleocr(pdf_path, lang='vi'):  # Vietnamese support
             all_text.append(f"Page {page_num+1}:\n" + "\n".join(page_text))
     doc.close()
     if all_text:
-        return [Document(page_content="\n\n".join(all_text), metadata={"source": pdf_path})]
+        return [Document(
+            page_content="\n\n".join(all_text),
+            metadata={
+                "source": pdf_path,
+                "filename": os.path.basename(pdf_path)
+            }
+        )]
     return []
 
 
@@ -116,7 +122,13 @@ def load_text_from_txt_file(filepath):
         try:
             with open(filepath, 'r', encoding=encoding) as f:
                 content = f.read()
-            return [Document(page_content=content, metadata={"source": filepath})]
+                return [Document(
+                    page_content=content,
+                    metadata={
+                        "source": filepath,
+                        "filename": os.path.basename(filepath)
+                    }
+                )]
         except (UnicodeDecodeError, LookupError):
             continue
 
@@ -131,6 +143,8 @@ def extract_text(file_list: List[str], docs_dir: str = DEFAULT_DOCS_DIR):
         try:
             if fn.lower().endswith(".pdf"):
                 loaded = PyPDFLoader(path).load()
+                for d in loaded:
+                    d.metadata["filename"] = os.path.basename(path)
                 all_text = " ".join(doc.page_content for doc in loaded)
                 if not loaded or is_gibberish(all_text):
                     st.warning(f"⚠️ Falling back to PaddleOCR for: {fn}")
@@ -144,9 +158,15 @@ def extract_text(file_list: List[str], docs_dir: str = DEFAULT_DOCS_DIR):
             elif fn.lower().endswith(".txt"):
                 docs.extend(load_text_from_txt_file(path))
             elif fn.lower().endswith(".docx"):
-                docs.extend(Docx2txtLoader(path).load())
+                loaded = Docx2txtLoader(path).load()
+                for d in loaded:
+                    d.metadata["filename"] = os.path.basename(path)
+                docs.extend(loaded)
             elif fn.lower().endswith(".doc"):
-                docs.extend(UnstructuredWordDocumentLoader(path).load())
+                loaded = UnstructuredWordDocumentLoader(path).load()
+                for d in loaded:
+                    d.metadata["filename"] = os.path.basename(path)
+                docs.extend(loaded)
             elif fn.lower().endswith(".xls") or fn.lower().endswith(".xlsx"):
                 # Excel support for both .xls and .xlsx, with engine selection
                 try:
@@ -167,7 +187,13 @@ def extract_text(file_list: List[str], docs_dir: str = DEFAULT_DOCS_DIR):
                     text += data.to_string(index=False)
                     text += "\n\n"
                 if text.strip():
-                    docs.append(Document(page_content=text, metadata={"source": path}))
+                    docs.append(Document(
+                        page_content=text,
+                        metadata={
+                            "source": path,
+                            "filename": os.path.basename(path)
+                        }
+                    ))
             else:
                 st.warning(f"⚠️ Unsupported file type: {fn}")
         except Exception as e:
@@ -222,7 +248,13 @@ def hash_text(text: str) -> str:
 #     #     openai_api_key=st.secrets["OPENAI_API_KEY"]
 #     # )
 #     embedding = GoogleGenerativeAIEmbeddings(
-#         model="text-embedding-004",
+                    # docs.append(Document(
+                    #     page_content=text,
+                    #     metadata={
+                    #         "source": path,
+                    #         "filename": os.path.basename(path)
+                    #     }
+                    # ))
 #         google_api_key=os.getenv('GOOGLE_API_KEY')
 #     )
 

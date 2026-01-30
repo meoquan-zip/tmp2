@@ -7,7 +7,7 @@ from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.outputs import ChatGenerationChunk
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 # from langchain_openai import ChatOpenAI
 
@@ -194,6 +194,9 @@ def _chat_response_streaming(prompt: str,
         "Do not mention the existence of the knowledge base, embeddings, or vector search. "
         "Simply answer naturally as a technical assistant. "
 
+        "After answering, append a short 'Sources:' section listing the filenames (no paths) of the documents you used. "
+        "If no sources are available, state 'Sources: none'. "
+
         "Answer using only the following context:\n\n{context}"
     )
     rag_prompt = ChatPromptTemplate.from_messages([
@@ -201,8 +204,15 @@ def _chat_response_streaming(prompt: str,
         MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}")
     ])
+    doc_prompt = PromptTemplate.from_template(
+        "Source: {source}\nContent:\n{page_content}"
+    )
 
-    chain = create_stuff_documents_chain(llm=llm, prompt=rag_prompt)
+    chain = create_stuff_documents_chain(
+        llm=llm,
+        prompt=rag_prompt,
+        document_prompt=doc_prompt,
+    )
     retrieval_chain = create_retrieval_chain(retriever, chain)
 
     # Create a new AI chat bubble and stream the response
