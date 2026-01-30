@@ -12,6 +12,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 # from langchain_openai import ChatOpenAI
 
 from .db_crud import get_user_last_n_messages, log_chat_message
+from .db_orm import Incident
 
 # def get_context_retriever_chain(vectordb, callbacks=None):
 #     """
@@ -114,6 +115,25 @@ def chat_user_prompt(chat_history: List,
         #         st.write("No context found for this answer.")
     return _chat_response_streaming(
         prompt=user_prompt,
+        chat_history=chat_history,
+        vectordb=vectordb,
+        username=username
+    )
+
+
+def chat_incident_prompt(incident: Incident,
+                         chat_history: List,
+                         vectordb,
+                         username: str) -> List:
+    prompt = (
+        f"I have an incident that needs troubleshooting help:\n\n"
+        f"Name: {incident.name}\n"
+        f"Description: {incident.description}\n"
+        f"Logs: {incident.log or 'N/A'}\n"
+        f"SLA (hours): {incident.sla_no_of_hours}\n"
+    )
+    return _chat_response_streaming(
+        prompt=prompt,
         chat_history=chat_history,
         vectordb=vectordb,
         username=username
