@@ -167,6 +167,14 @@ def extract_text(file_list: List[str], docs_dir: str = DEFAULT_DOCS_DIR):
                 for d in loaded:
                     d.metadata["filename"] = os.path.basename(path)
                 docs.extend(loaded)
+                # # if shutil.which("soffice") is None:
+                # #     st.error(
+                # #         "❌ LibreOffice (soffice) is required to process .doc files. "
+                # #         "Install it (see https://www.libreoffice.org/get-help/install-howto/) "
+                # #         "or convert the file to .docx and re-upload."
+                # #     )
+                # #     continue
+                # docs.extend(UnstructuredWordDocumentLoader(path).load())
             elif fn.lower().endswith(".xls") or fn.lower().endswith(".xlsx"):
                 # Excel support for both .xls and .xlsx, with engine selection
                 try:
